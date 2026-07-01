@@ -24,6 +24,13 @@ extension ThemeContext on BuildContext {
   /// fontSize 12px
   TextStyle get h7 => text.titleLarge!; // 12
 
+  /// Serif display face (Playfair Display), used for the brand title and
+  /// article headlines.
+  TextStyle get display => const TextStyle(
+    fontFamily: 'PlayfairDisplay',
+    fontVariations: [FontVariation('wght', 500)],
+  );
+
   // colors
 
   Color get fieldStroke => colorScheme.tertiaryFixed;

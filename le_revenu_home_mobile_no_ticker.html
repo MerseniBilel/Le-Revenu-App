@@ -1,0 +1,92 @@
+<h2 class="sr-only">Maquette d'une page d'accueil mobile pour l'application Le Revenu, média financier, sans bandeau de marchés : en-tête avec logo, article à la une, rubriques, liste d'articles et navigation inférieure.</h2>
+<style>
+.lr{--brand:#C1272D}
+@media (prefers-color-scheme:dark){.lr{--brand:#F0605F}}
+.lr [data-mode="dark"]{--brand:#F0605F}
+.lr *{box-sizing:border-box}
+.lr .chip{white-space:nowrap;font-size:13px;padding:7px 14px;border-radius:999px;border:0.5px solid var(--border);color:var(--text-secondary);background:var(--surface-2)}
+.lr .eyebrow{font-size:11px;letter-spacing:.09em;font-weight:500;color:var(--brand)}
+.lr .nav i{font-size:22px;display:block;line-height:1}
+</style>
+<div class="lr" style="background:var(--surface-1);border-radius:16px;padding:22px;display:flex;justify-content:center">
+  <div style="width:378px;background:var(--surface-2);border:0.5px solid var(--border);border-radius:38px;overflow:hidden">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px 6px;font-size:13px;font-weight:500;color:var(--text-primary)">
+      <span>9:41</span>
+      <span style="display:flex;gap:6px;align-items:center;color:var(--text-secondary)"><i class="ti ti-signal-4g"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:8px 20px 14px;border-bottom:0.5px solid var(--border)">
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:.04em">MERCREDI 1 JUILLET</div>
+        <div style="font-family:var(--font-voice);font-size:26px;font-weight:500;letter-spacing:.02em;color:var(--brand);line-height:1.1">LE REVENU</div>
+      </div>
+      <div style="display:flex;gap:16px;color:var(--text-secondary);font-size:22px;padding-bottom:2px"><i class="ti ti-search"></i><i class="ti ti-bell"></i></div>
+    </div>
+
+    <div style="padding:16px 20px 4px">
+      <div class="eyebrow">À LA UNE</div>
+    </div>
+    <div style="margin:6px 20px 0;border-radius:14px;overflow:hidden;position:relative;background:#17202E;height:210px">
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#3a4658;font-size:34px"><i class="ti ti-chart-candle"></i></div>
+      <span style="position:absolute;top:12px;left:12px;background:var(--brand);color:#fff;font-size:11px;letter-spacing:.06em;font-weight:500;padding:4px 10px;border-radius:6px">BOURSE</span>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:18px 14px 15px;background:rgba(10,14,22,.72)">
+        <div style="color:#fff;font-family:var(--font-voice);font-size:19px;font-weight:500;line-height:1.28">CAC 40 : les trois valeurs à surveiller avant la saison des résultats</div>
+        <div style="color:#c9cfda;font-size:11px;margin-top:7px">Il y a 2 h · 4 min de lecture</div>
+      </div>
+    </div>
+
+    <div style="padding:20px 20px 8px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:500;color:var(--text-primary)">Rubriques</div>
+      <span style="font-size:12px;color:var(--brand)">Tout voir</span>
+    </div>
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:0 20px 4px">
+      <span class="chip" style="background:var(--brand);color:#fff;border-color:var(--brand)">Bourse</span>
+      <span class="chip">Immobilier</span>
+      <span class="chip">Placements</span>
+      <span class="chip">Fiscalité</span>
+      <span class="chip">Assurance</span>
+      <span class="chip">Retraite</span>
+    </div>
+
+    <div style="padding:18px 20px 6px;font-size:15px;font-weight:500;color:var(--text-primary)">Dernières actualités</div>
+
+    <div style="padding:0 20px">
+      <div style="display:flex;gap:14px;padding:14px 0;border-top:0.5px solid var(--border)">
+        <div style="flex:1">
+          <div class="eyebrow">IMMOBILIER</div>
+          <div style="font-size:14.5px;font-weight:500;line-height:1.32;color:var(--text-primary);margin-top:4px">SCPI : le rendement moyen repasse au-dessus de 4,5 % en 2026</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Il y a 35 min · 3 min</div>
+        </div>
+        <div style="width:78px;height:78px;border-radius:10px;flex-shrink:0;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#e1f5ee;font-size:24px"><i class="ti ti-building-community"></i></div>
+      </div>
+
+      <div style="display:flex;gap:14px;padding:14px 0;border-top:0.5px solid var(--border)">
+        <div style="flex:1">
+          <div class="eyebrow">FISCALITÉ</div>
+          <div style="font-size:14.5px;font-weight:500;line-height:1.32;color:var(--text-primary);margin-top:4px">Impôt sur le revenu : ce qui change pour votre déclaration</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Il y a 1 h · 5 min</div>
+        </div>
+        <div style="width:78px;height:78px;border-radius:10px;flex-shrink:0;background:#BA7517;display:flex;align-items:center;justify-content:center;color:#faeeda;font-size:24px"><i class="ti ti-receipt-tax"></i></div>
+      </div>
+
+      <div style="display:flex;gap:14px;padding:14px 0;border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border)">
+        <div style="flex:1">
+          <div class="eyebrow">PLACEMENTS</div>
+          <div style="font-size:14.5px;font-weight:500;line-height:1.32;color:var(--text-primary);margin-top:4px">Assurance-vie : les meilleurs fonds euros du moment</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Il y a 2 h · 6 min</div>
+        </div>
+        <div style="width:78px;height:78px;border-radius:10px;flex-shrink:0;background:#378ADD;display:flex;align-items:center;justify-content:center;color:#e6f1fb;font-size:24px"><i class="ti ti-pig-money"></i></div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-around;align-items:center;padding:12px 8px 20px;margin-top:10px;border-top:0.5px solid var(--border);background:var(--surface-2)">
+      <div class="nav" style="text-align:center;color:var(--brand);font-size:11px;font-weight:500"><i class="ti ti-news"></i>Accueil</div>
+      <div class="nav" style="text-align:center;color:var(--text-muted);font-size:11px"><i class="ti ti-chart-line"></i>Marchés</div>
+      <div class="nav" style="text-align:center;color:var(--text-muted);font-size:11px"><i class="ti ti-briefcase"></i>Portefeuille</div>
+      <div class="nav" style="text-align:center;color:var(--text-muted);font-size:11px"><i class="ti ti-layout-grid"></i>Rubriques</div>
+      <div class="nav" style="text-align:center;color:var(--text-muted);font-size:11px"><i class="ti ti-user"></i>Compte</div>
+    </div>
+
+  </div>
+</div>

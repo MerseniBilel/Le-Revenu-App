@@ -1,10 +1,12 @@
 import 'package:dartz/dartz.dart';
-import 'package:forge_annotation/forge_annotation.dart';
 
 import '../../../../core/errors/failures/failures.dart';
-import '../../domain/entities/home_entities_export.dart';
+import '../entities/home_entities_export.dart';
 
+/// Contract used by the presentation layer to load the home page content.
+///
+/// The current implementation serves fake data, but the contract stays the
+/// same the day a real API is plugged in.
 abstract class HomeRepository {
-  @GET(endPoint: 'exemple')
-  Future<Either<Failure, HomeEntity>> exemple();
+  Future<Either<Failure, HomeContent>> getHomeContent();
 }

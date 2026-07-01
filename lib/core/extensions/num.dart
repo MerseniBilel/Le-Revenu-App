@@ -1,5 +1,3 @@
-import 'package:sizer/sizer.dart';
-
 import '../router/routes_export.dart';
 
 extension ConvertPxToPercent on num {
