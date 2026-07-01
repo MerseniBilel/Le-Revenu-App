@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="darkprimary">#F0605F</color> <!-- brand red -->
+    <color name="darkonPrimary">#FFFFFF</color> <!-- text/icon on primary -->
+    <color name="darksecondary">#B4B2A9</color> <!-- paragraph, subheading -->
+    <color name="darkgreen">#5DCAA5</color> <!-- up / positive -->
+    <color name="darkred">#F09595</color> <!-- down / negative -->
+    <color name="darkheading">#F5F1EC</color> <!-- heading, title -->
+    <color name="darkfieldStroke">#33302C</color>
+    <color name="darkfieldPlaceholder">#888780</color>
+    <color name="darkfield">#262220</color>
+    <color name="darkscaffoldBackgroundColor">#141110</color> <!-- background -->
+    <color name="darkcard">#201C1A</color> <!-- card like gifts -->
+
+    <!-- rubriques accents -->
+    <color name="darkbourse">#F0605F</color>
+    <color name="darkimmobilier">#5DCAA5</color>
+    <color name="darkplacements">#85B7EB</color>
+    <color name="darkfiscalite">#EF9F27</color>
+    <color name="darkassurance">#ED93B1</color>
+    <color name="darkretraite">#AFA9EC</color>
+</resources>

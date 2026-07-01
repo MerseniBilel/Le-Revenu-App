@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#C1272D</color> <!-- brand red -->
+    <color name="onPrimary">#FFFFFF</color> <!-- text/icon on primary -->
+    <color name="secondary">#5F5E5A</color> <!-- paragraph, subheading -->
+    <color name="green">#0F6E56</color> <!-- up / positive -->
+    <color name="red">#A32D2D</color> <!-- down / negative -->
+    <color name="heading">#14181F</color> <!-- heading, title -->
+    <color name="fieldStroke">#EAE3DB</color>
+    <color name="fieldPlaceholder">#8A8A85</color>
+    <color name="field">#F4EEE8</color>
+    <color name="scaffoldBackgroundColor">#FBEDE7</color> <!-- background (warm cream) -->
+    <color name="card">#FFFFFF</color> <!-- card like gifts -->
+
+    <!-- rubriques accents -->
+    <color name="bourse">#C1272D</color>
+    <color name="immobilier">#1D9E75</color>
+    <color name="placements">#378ADD</color>
+    <color name="fiscalite">#BA7517</color>
+    <color name="assurance">#D4537E</color>
+    <color name="retraite">#534AB7</color>
+</resources>
