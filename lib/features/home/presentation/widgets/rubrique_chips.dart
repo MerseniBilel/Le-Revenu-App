@@ -29,6 +29,16 @@ class _RubriqueChipsState extends State<RubriqueChips> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    // The floating copy of the bar can be mounted mid-scroll: bring the
+    // already-selected chip into view right away.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _revealSelected();
+    });
+  }
+
+  @override
   void didUpdateWidget(RubriqueChips oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selected != oldWidget.selected) _revealSelected();

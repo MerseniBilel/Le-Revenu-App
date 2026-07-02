@@ -11,9 +11,9 @@ La page d'accueil comprend :
   **bouton clair/sombre** (préférence persistée via `hydrated_bloc`) ;
 - l'**actualité principale** mise en avant (« À la une ») dans une carte héro ;
 - des **rubriques** (Bourse, Immobilier, Placements, Fiscalité, Assurance, Retraite)
-  sous forme de chips **épinglées en haut au scroll** (`SliverPersistentHeader`)
-  avec **scroll-spy** : la rubrique active se met à jour selon la position de
-  défilement, et taper une chip fait défiler jusqu'à sa section ;
+  sous forme de chips **épinglées en haut au scroll** avec **scroll-spy** : la
+  rubrique active se met à jour selon la position de défilement, et taper une
+  chip fait défiler jusqu'à sa section ;
 - **« L'actualité en vidéos courtes »** : carrousel horizontal de vignettes.
   Les vidéos **ne se lancent pas sur la home** — un tap ouvre un écran plein
   écran avec **animation Hero**, où la lecture (simulée) démarre, avec
@@ -102,13 +102,16 @@ lib/
 
 ### Rubriques épinglées + scroll-spy
 
-Les chips sont rendues dans un `SliverPersistentHeader(pinned: true)`. Les
-articles sont groupés par rubrique (`HomeLoaded.articleGroups`) ; chaque groupe
-porte une `GlobalKey`. Au défilement, la section dont le haut est passé sous la
-barre épinglée devient la rubrique active ; taper une chip anime le scroll
-jusqu'à son groupe (le scroll-spy est suspendu pendant l'animation pour éviter
-que les sections intermédiaires « volent » la sélection). La liste de chips
-défile automatiquement pour garder la chip active visible.
+Volontairement **sans slivers**, pour rester lisible : le corps de page est un
+simple `SingleChildScrollView` + `Column`, et l'effet « épinglé » est obtenu
+avec un `Stack` — dès que la barre de chips inline passe le haut du corps, une
+copie flottante (même widget) est superposée en haut. Les articles sont groupés
+par rubrique (`HomeLoaded.articleGroups`) ; chaque groupe porte une
+`GlobalKey`. Au défilement, la section dont le haut est passé sous la barre
+devient la rubrique active ; taper une chip anime le scroll jusqu'à son groupe
+(le scroll-spy est suspendu pendant l'animation pour éviter que les sections
+intermédiaires « volent » la sélection). La liste de chips défile
+automatiquement pour garder la chip active visible.
 
 ### Vidéos courtes
 
@@ -121,8 +124,10 @@ sans embarquer de fichiers médias.
 
 ### Performances
 
-- Listes construites paresseusement (`CustomScrollView`, `ListView.separated`
-  pour les rails horizontaux) ;
+- Rails horizontaux construits paresseusement (`ListView.separated`) ; le corps
+  vertical est un `SingleChildScrollView` assumé : le contenu est court et
+  borné (fake data), et garder toutes les sections montées rend le scroll-spy
+  fiable sans machinerie sliver ;
 - widgets `const` partout où c'est possible, sous-widgets privés plutôt que
   méthodes-builder pour maximiser le cache de l'arbre ;
 - rebuilds limités : l'en-tête ne se reconstruit pas lors des changements

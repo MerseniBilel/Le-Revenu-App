@@ -56,10 +56,10 @@ class _HomeView extends StatelessWidget {
 
 /// Scrollable body of the page.
 ///
-/// The rubrique chips are pinned below the masthead while scrolling, and act
+/// The rubrique chips scroll with the content; once they pass the top of the
+/// body, a floating copy of the bar is overlaid ("pinned" effect) and acts
 /// as a scroll-spy over the grouped "Dernières actualités":
-/// - scrolling updates the highlighted chip based on the group under the
-///   pinned header;
+/// - scrolling updates the highlighted chip based on the group under the bar;
 /// - tapping a chip scrolls to its group.
 class _HomeContent extends StatefulWidget {
   const _HomeContent({required this.state});
@@ -71,11 +71,15 @@ class _HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<_HomeContent> {
+  static const _chipsBarHeight = 54.0;
+
   final _scrollController = ScrollController();
-  final _pinnedChipsKey = GlobalKey();
+  final _bodyKey = GlobalKey();
+  final _inlineChipsKey = GlobalKey();
   late Map<NewsCategory, GlobalKey> _groupKeys;
 
   NewsCategory? _activeRubrique;
+  bool _showFloatingBar = false;
 
   /// Suspends the scroll-spy while a chip-triggered animation is running,
   /// so intermediate groups don't steal the selection.
@@ -107,53 +111,53 @@ class _HomeContentState extends State<_HomeContent> {
     _activeRubrique = _groups.isEmpty ? null : _groups.first.category;
   }
 
-  /// Screen-space Y of the bottom edge of the pinned chips bar.
-  double? get _pinnedHeaderBottom {
-    final box =
-        _pinnedChipsKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.attached) return null;
-    return box.localToGlobal(Offset(0, box.size.height)).dy;
-  }
-
-  /// Screen-space Y of the top edge of a rubrique group.
-  double? _groupTop(NewsCategory rubrique) {
-    final box =
-        _groupKeys[rubrique]?.currentContext?.findRenderObject() as RenderBox?;
+  /// Screen-space Y of the top edge of the widget owning [key].
+  double? _topOf(GlobalKey key) {
+    final box = key.currentContext?.findRenderObject() as RenderBox?;
     if (box == null || !box.attached) return null;
     return box.localToGlobal(Offset.zero).dy;
   }
 
   void _onScroll() {
-    if (_autoScrolling || _groups.isEmpty) return;
-    final threshold = _pinnedHeaderBottom;
-    if (threshold == null) return;
+    if (_groups.isEmpty) return;
+    final bodyTop = _topOf(_bodyKey);
+    final chipsTop = _topOf(_inlineChipsKey);
+    if (bodyTop == null || chipsTop == null) return;
 
-    // Active group = the last one whose top passed under the pinned bar.
-    NewsCategory? active;
-    for (final group in _groups) {
-      final top = _groupTop(group.category);
-      if (top == null || top > threshold + 12) break;
-      active = group.category;
+    final showFloatingBar = chipsTop <= bodyTop;
+
+    // Active group = the last one whose top passed under the chips bar.
+    var active = _activeRubrique;
+    if (!_autoScrolling) {
+      final threshold = bodyTop + _chipsBarHeight + 12;
+      active = null;
+      for (final group in _groups) {
+        final top = _topOf(_groupKeys[group.category]!);
+        if (top == null || top > threshold) break;
+        active = group.category;
+      }
+      active ??= _groups.first.category;
     }
-    active ??= _groups.first.category;
-    if (active != _activeRubrique) {
-      setState(() => _activeRubrique = active);
+
+    if (showFloatingBar != _showFloatingBar || active != _activeRubrique) {
+      setState(() {
+        _showFloatingBar = showFloatingBar;
+        _activeRubrique = active;
+      });
     }
   }
 
   Future<void> _scrollToRubrique(NewsCategory rubrique) async {
-    final top = _groupTop(rubrique);
-    final threshold = _pinnedHeaderBottom;
-    if (top == null || threshold == null) return;
+    final top = _topOf(_groupKeys[rubrique]!);
+    final bodyTop = _topOf(_bodyKey);
+    if (top == null || bodyTop == null) return;
 
     setState(() {
       _activeRubrique = rubrique;
       _autoScrolling = true;
     });
-    final target = (_scrollController.offset + top - threshold).clamp(
-      0.0,
-      _scrollController.position.maxScrollExtent,
-    );
+    final target = (_scrollController.offset + top - bodyTop - _chipsBarHeight)
+        .clamp(0.0, _scrollController.position.maxScrollExtent);
     await _scrollController.animateTo(
       target,
       duration: const Duration(milliseconds: 420),
@@ -165,131 +169,114 @@ class _HomeContentState extends State<_HomeContent> {
   @override
   Widget build(BuildContext context) {
     final content = widget.state.content;
-    return RefreshIndicator(
-      onRefresh: context.read<HomeCubit>().refresh,
-      child: CustomScrollView(
-        controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
+    return Stack(
+      key: _bodyKey,
+      children: [
+        RefreshIndicator(
+          onRefresh: context.read<HomeCubit>().refresh,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const EyebrowText('À la une'),
+                      const SizedBox(height: 8),
+                      FeaturedArticleCard(
+                        article: content.featured,
+                        onTap: () => _showComingSoon(context, "L'article"),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 2),
+                  child: SectionHeader(
+                    title: 'Rubriques',
+                    actionLabel: 'Tout voir',
+                    onActionTap: () =>
+                        _showComingSoon(context, 'Cette section'),
+                  ),
+                ),
+                _chipsBar(key: _inlineChipsKey),
+                if (content.videoShorts.isNotEmpty)
+                  VideoShortsRail(
+                    videos: content.videoShorts,
+                    onVideoTap: (video) =>
+                        VideoShortRoute(video).push<void>(context),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
+                  child: const SectionHeader(title: 'Dernières actualités'),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      for (final group in _groups)
+                        Column(
+                          key: _groupKeys[group.category],
+                          children: [
+                            for (final article in group.articles) ...[
+                              _hairline(context),
+                              ArticleTile(
+                                article: article,
+                                onTap: () =>
+                                    _showComingSoon(context, "L'article"),
+                              ),
+                            ],
+                          ],
+                        ),
+                      _hairline(context),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
         ),
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const EyebrowText('À la une'),
-                  const SizedBox(height: 8),
-                  FeaturedArticleCard(
-                    article: content.featured,
-                    onTap: () => _showComingSoon(context, "L'article"),
-                  ),
-                ],
-              ),
-            ),
+        if (_showFloatingBar)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _chipsBar(floating: true),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 2),
-              child: SectionHeader(
-                title: 'Rubriques',
-                actionLabel: 'Tout voir',
-                onActionTap: () => _showComingSoon(context, 'Cette section'),
-              ),
-            ),
-          ),
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _PinnedChipsDelegate(
-              child: Container(
-                key: _pinnedChipsKey,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: context.theme.scaffoldBackgroundColor,
-                  border: Border(
-                    bottom: BorderSide(color: context.fieldStroke, width: .5),
-                  ),
-                ),
-                child: RubriqueChips(
-                  rubriques: [for (final g in _groups) g.category],
-                  selected: _activeRubrique,
-                  onSelected: _scrollToRubrique,
-                ),
-              ),
-            ),
-          ),
-          if (content.videoShorts.isNotEmpty)
-            SliverToBoxAdapter(
-              child: VideoShortsRail(
-                videos: content.videoShorts,
-                onVideoTap: (video) => VideoShortRoute(video).push<void>(
-                  context,
-                ),
-              ),
-            ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
-              child: const SectionHeader(title: 'Dernières actualités'),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  for (final group in _groups)
-                    Column(
-                      key: _groupKeys[group.category],
-                      children: [
-                        for (final article in group.articles) ...[
-                          _hairline(context),
-                          ArticleTile(
-                            article: article,
-                            onTap: () => _showComingSoon(context, "L'article"),
-                          ),
-                        ],
-                      ],
-                    ),
-                  _hairline(context),
-                ],
-              ),
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        ],
-      ),
+      ],
     );
   }
 
+  /// The chips bar is a single widget used twice: inline in the scroll flow,
+  /// and as the floating "pinned" copy (with background and hairline).
+  Widget _chipsBar({Key? key, bool floating = false}) => Container(
+    key: key,
+    height: _chipsBarHeight,
+    alignment: Alignment.center,
+    decoration: floating
+        ? BoxDecoration(
+            color: context.theme.scaffoldBackgroundColor,
+            border: Border(
+              bottom: BorderSide(color: context.fieldStroke, width: .5),
+            ),
+          )
+        : null,
+    child: RubriqueChips(
+      rubriques: [for (final group in _groups) group.category],
+      selected: _activeRubrique,
+      onSelected: _scrollToRubrique,
+    ),
+  );
+
   Widget _hairline(BuildContext context) =>
       Divider(height: .5, thickness: .5, color: context.fieldStroke);
-}
-
-class _PinnedChipsDelegate extends SliverPersistentHeaderDelegate {
-  const _PinnedChipsDelegate({required this.child});
-
-  final Widget child;
-
-  static const _height = 54.0;
-
-  @override
-  double get minExtent => _height;
-
-  @override
-  double get maxExtent => _height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) => child;
-
-  @override
-  bool shouldRebuild(covariant _PinnedChipsDelegate oldDelegate) =>
-      oldDelegate.child != child;
 }
 
 class _ErrorView extends StatelessWidget {
