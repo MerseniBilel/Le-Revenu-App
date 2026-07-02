@@ -7,6 +7,7 @@ import '../../../../core/router/router.dart';
 import '../../../../core/shared/theme_manager_cubit.dart';
 import '../../../../core/shared/widgets/eyebrow_text.dart';
 import '../../../../core/shared/widgets/section_header.dart';
+import '../../domain/entities/home_entities_export.dart';
 import '../cubit/home_cubit.dart';
 import '../models/video_playlist.dart';
 import '../widgets/article_tile.dart';
@@ -83,21 +84,35 @@ class _HomeContent extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         itemCount: _sectionCount + articleItemCount,
         itemBuilder: (context, index) => switch (index) {
-          _featuredIndex => _buildFeatured(context),
-          _rubriquesHeaderIndex => _buildRubriquesHeader(context),
-          _chipsIndex => _buildChips(context),
-          _videosIndex => _buildVideosRail(context),
+          _featuredIndex => _FeaturedSection(article: state.content.featured),
+          _rubriquesHeaderIndex => const _RubriquesHeader(),
+          _chipsIndex => _RubriqueFilters(
+            rubriques: state.rubriques,
+            selected: state.selectedRubrique,
+          ),
+          _videosIndex => _VideosSection(videos: state.content.videoShorts),
           _latestHeaderIndex => const Padding(
             padding: EdgeInsets.fromLTRB(20, 18, 20, 6),
             child: SectionHeader(title: 'Dernières actualités'),
           ),
-          _ => _buildArticleItem(context, index - _sectionCount),
+          _ => _ArticleListItem(
+            articles: articles,
+            index: index - _sectionCount,
+          ),
         },
       ),
     );
   }
+}
 
-  Widget _buildFeatured(BuildContext context) => Padding(
+/// "À la une": eyebrow + hero card.
+class _FeaturedSection extends StatelessWidget {
+  const _FeaturedSection({required this.article});
+
+  final Article article;
+
+  @override
+  Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,14 +120,19 @@ class _HomeContent extends StatelessWidget {
         const EyebrowText('À la une'),
         const SizedBox(height: 8),
         FeaturedArticleCard(
-          article: state.content.featured,
+          article: article,
           onTap: () => _showComingSoon(context, "L'article"),
         ),
       ],
     ),
   );
+}
 
-  Widget _buildRubriquesHeader(BuildContext context) => Padding(
+class _RubriquesHeader extends StatelessWidget {
+  const _RubriquesHeader();
+
+  @override
+  Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
     child: SectionHeader(
       title: 'Rubriques',
@@ -120,15 +140,29 @@ class _HomeContent extends StatelessWidget {
       onActionTap: () => _showComingSoon(context, 'Cette section'),
     ),
   );
+}
 
-  Widget _buildChips(BuildContext context) => RubriqueChips(
-    rubriques: state.rubriques,
-    selected: state.selectedRubrique,
+class _RubriqueFilters extends StatelessWidget {
+  const _RubriqueFilters({required this.rubriques, required this.selected});
+
+  final List<NewsCategory> rubriques;
+  final NewsCategory? selected;
+
+  @override
+  Widget build(BuildContext context) => RubriqueChips(
+    rubriques: rubriques,
+    selected: selected,
     onSelected: context.read<HomeCubit>().selectRubrique,
   );
+}
 
-  Widget _buildVideosRail(BuildContext context) {
-    final videos = state.content.videoShorts;
+class _VideosSection extends StatelessWidget {
+  const _VideosSection({required this.videos});
+
+  final List<VideoShort> videos;
+
+  @override
+  Widget build(BuildContext context) {
     if (videos.isEmpty) return const SizedBox.shrink();
     return VideoShortsRail(
       videos: videos,
@@ -137,9 +171,18 @@ class _HomeContent extends StatelessWidget {
       ).push<void>(context),
     );
   }
+}
 
-  Widget _buildArticleItem(BuildContext context, int index) {
-    final articles = state.visibleArticles;
+/// One position of the news feed: an article row, the closing hairline
+/// after the last row, or the "empty rubrique" message.
+class _ArticleListItem extends StatelessWidget {
+  const _ArticleListItem({required this.articles, required this.index});
+
+  final List<Article> articles;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
     if (articles.isEmpty) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
@@ -152,16 +195,16 @@ class _HomeContent extends StatelessWidget {
       );
     }
     if (index == articles.length) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: _hairline(context),
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        child: _Hairline(),
       );
     }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          _hairline(context),
+          const _Hairline(),
           ArticleTile(
             article: articles[index],
             onTap: () => _showComingSoon(context, "L'article"),
@@ -170,8 +213,13 @@ class _HomeContent extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _hairline(BuildContext context) =>
+class _Hairline extends StatelessWidget {
+  const _Hairline();
+
+  @override
+  Widget build(BuildContext context) =>
       Divider(height: .5, thickness: .5, color: context.fieldStroke);
 }
 
