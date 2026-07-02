@@ -10,15 +10,15 @@ La page d'accueil comprend :
 - un **en-tête** avec la date du jour, la marque « LE REVENU », la recherche et un
   **bouton clair/sombre** (préférence persistée via `hydrated_bloc`) ;
 - l'**actualité principale** mise en avant (« À la une ») dans une carte héro ;
-- des **rubriques** (Bourse, Immobilier, Placements, Fiscalité, Assurance, Retraite)
-  sous forme de chips horizontales : taper une chip **fait défiler la page**
-  jusqu'aux articles de cette rubrique (le fil est ordonné par rubrique) ;
 - **« L'actualité en vidéos courtes »** : carrousel horizontal de vignettes.
   Les vidéos **ne se lancent pas sur la home** — un tap ouvre un lecteur plein
   écran avec **animation Hero**, façon TikTok : `PageView` vertical pour passer
   d'une vidéo à l'autre, avec un indicateur animé « glissez pour changer de
   vidéo » qui disparaît après quelques secondes ou au premier swipe. Lecture
   (simulée) avec progression, play/pause et coupure du son ;
+- des **rubriques** (Bourse, Immobilier, Placements, Fiscalité, Assurance,
+  Retraite) sous forme de chips horizontales, placées sous les vidéos, qui
+  **filtrent** la liste d'articles (chip « Tous » pour revenir à tout) ;
 - la liste des **dernières actualités**, avec catégorie, temps de lecture et
   date relative (« Il y a 35 min ») ;
 - **pull-to-refresh**, états de **chargement** et d'**erreur** avec retry ;
@@ -89,8 +89,7 @@ lib/
 
 - **S** — chaque widget/classe a une responsabilité unique : `ArticleTile` affiche
   un article, `HomeCubit` orchestre l'état, `FakeHomeLocalDataSource` fournit les
-  données, la position de scroll et la chip active vivent dans l'état du
-  widget (état éphémère d'UI, pas dans le cubit) ;
+  données ;
 - **O** — les composants sont ouverts à l'extension par paramètres
   (`RubriqueChips` accepte n'importe quelle liste de rubriques, `SectionHeader`
   une action optionnelle) sans modification de leur code ;
@@ -116,11 +115,8 @@ réelle de la vidéo (progression, play/pause au tap, replay en fin de lecture)
 ### Performances
 
 - Le corps de page est un `SingleChildScrollView` simple (sections « à la
-  une », rubriques, vidéos) ; le fil « Dernières actualités » est un
-  `ListView.builder` aux lignes de hauteur fixe — ce qui permet de calculer
-  exactement l'offset de scroll d'une rubrique (`hauteur des sections +
-  index × hauteur de ligne`) quand on tape une chip ; les rails horizontaux
-  sont des `ListView` lazy ;
+  une », vidéos, rubriques) et le fil « Dernières actualités » est le seul
+  `ListView.builder` ; les rails horizontaux sont des `ListView` lazy ;
 - widgets `const` partout où c'est possible, sous-widgets privés plutôt que
   méthodes-builder pour maximiser le cache de l'arbre ;
 - rebuilds limités : l'en-tête ne se reconstruit pas lors des changements
@@ -142,5 +138,7 @@ chaînes.
 - Bouton soleil/lune dans l'en-tête : bascule clair/sombre, persistée entre les
   lancements ;
 - seules les rubriques ayant des articles sont proposées en chips ;
+- état vide impossible par construction : chaque chip correspond à une
+  rubrique qui a au moins un article ;
 - les actions non couvertes par le test (recherche, article, « Tout voir »)
   affichent un snackbar « arrive bientôt » plutôt que de ne rien faire.

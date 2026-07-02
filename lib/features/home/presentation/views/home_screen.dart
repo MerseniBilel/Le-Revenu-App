@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/extensions/snackbar.dart';
 import '../../../../core/gen/injection.dart';
 import '../../../../core/shared/theme_manager_cubit.dart';
-import '../../domain/entities/home_entities_export.dart';
 import '../cubit/home_cubit.dart';
 import '../widgets/article_list_item.dart';
 import '../widgets/home_error_view.dart';
@@ -52,73 +51,18 @@ class _HomeView extends StatelessWidget {
 
 /// Scrollable body of the page: a [SingleChildScrollView] with the page
 /// sections ([HomeSections]) followed by the "Dernières actualités" feed,
-/// which is the only [ListView.builder].
-///
-/// Tapping a rubrique chip auto-scrolls to the first article of that
-/// rubrique: rows have a fixed height ([ArticleListItem.height]), so the
-/// target offset is simply `sections height + first index × row height`.
-class _HomeContent extends StatefulWidget {
+/// which is the only [ListView.builder]. The rubrique chips filter the feed.
+class _HomeContent extends StatelessWidget {
   const _HomeContent({required this.state});
 
   final HomeLoaded state;
 
   @override
-  State<_HomeContent> createState() => _HomeContentState();
-}
-
-class _HomeContentState extends State<_HomeContent> {
-  final _scrollController = ScrollController();
-  final _sectionsKey = GlobalKey();
-
-  NewsCategory? _selectedRubrique;
-
-  /// Measured height of [HomeSections], kept up to date while it is built
-  /// so the chip auto-scroll still works once it scrolled out of view.
-  double? _sectionsHeight;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedRubrique = widget.state.rubriques.firstOrNull;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _measureSections());
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _measureSections() {
-    final box = _sectionsKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box != null && box.hasSize) _sectionsHeight = box.size.height;
-  }
-
-  Future<void> _scrollToRubrique(NewsCategory rubrique) async {
-    _measureSections();
-    final sectionsHeight = _sectionsHeight;
-    if (sectionsHeight == null) return;
-
-    setState(() => _selectedRubrique = rubrique);
-    final index = widget.state.firstArticleIndexOf(rubrique);
-    final target = (sectionsHeight + index * ArticleListItem.height).clamp(
-      0.0,
-      _scrollController.position.maxScrollExtent,
-    );
-    await _scrollController.animateTo(
-      target,
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.easeInOutCubic,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final articles = widget.state.orderedArticles;
+    final articles = state.visibleArticles;
     return RefreshIndicator(
       onRefresh: context.read<HomeCubit>().refresh,
       child: SingleChildScrollView(
-        controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
@@ -127,12 +71,11 @@ class _HomeContentState extends State<_HomeContent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             HomeSections(
-              key: _sectionsKey,
-              featured: widget.state.content.featured,
-              videos: widget.state.content.videoShorts,
-              rubriques: widget.state.rubriques,
-              selectedRubrique: _selectedRubrique,
-              onRubriqueTap: _scrollToRubrique,
+              featured: state.content.featured,
+              videos: state.content.videoShorts,
+              rubriques: state.rubriques,
+              selectedRubrique: state.selectedRubrique,
+              onRubriqueSelected: context.read<HomeCubit>().selectRubrique,
             ),
             ListView.builder(
               shrinkWrap: true,

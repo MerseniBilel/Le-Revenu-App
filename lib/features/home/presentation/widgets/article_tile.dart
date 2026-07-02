@@ -31,9 +31,7 @@ class ArticleTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   article.title,
-                  // Two lines max keeps every row the same height, which
-                  // the chip auto-scroll relies on (ArticleListItem.height).
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: context.h5.copyWith(
                     fontSize: 14.5,
