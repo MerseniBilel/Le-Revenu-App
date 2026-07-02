@@ -35,10 +35,14 @@ class _RubriqueChipsState extends State<RubriqueChips> {
   }
 
   void _revealSelected() {
-    final context = _chipKeys[widget.selected]?.currentContext;
-    if (context == null) return;
-    Scrollable.ensureVisible(
-      context,
+    final chipContext = _chipKeys[widget.selected]?.currentContext;
+    final renderObject = chipContext?.findRenderObject();
+    if (chipContext == null || renderObject == null) return;
+    // Scroll ONLY the horizontal chip list. The static
+    // `Scrollable.ensureVisible` would walk up to the page's vertical
+    // scrollable too and drag the whole page along.
+    Scrollable.of(chipContext, axis: Axis.horizontal).position.ensureVisible(
+      renderObject,
       alignment: .5,
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOut,
