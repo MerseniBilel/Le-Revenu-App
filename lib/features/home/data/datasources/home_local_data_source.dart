@@ -8,6 +8,8 @@ import '../models/home_models_export.dart';
 /// local fake, a cache or a remote API.
 abstract class HomeLocalDataSource {
   Future<List<ArticleModel>> fetchArticles();
+
+  Future<List<VideoShortModel>> fetchVideoShorts();
 }
 
 /// Fake implementation: serves an in-memory, JSON-shaped payload after a
@@ -24,6 +26,39 @@ class FakeHomeLocalDataSource implements HomeLocalDataSource {
     final now = DateTime.now();
     return _payload(now).map(ArticleModel.fromJson).toList();
   }
+
+  @override
+  Future<List<VideoShortModel>> fetchVideoShorts() async {
+    await Future<void>.delayed(_networkDelay);
+    return _videosPayload.map(VideoShortModel.fromJson).toList();
+  }
+
+  static const List<Map<String, dynamic>> _videosPayload = [
+    {
+      'id': 'v-01',
+      'title': 'Combien gagne vraiment un trader ?',
+      'category': 'bourse',
+      'duration_seconds': 58,
+    },
+    {
+      'id': 'v-02',
+      'title': 'SCPI : faut-il encore investir en 2026 ?',
+      'category': 'immobilier',
+      'duration_seconds': 72,
+    },
+    {
+      'id': 'v-03',
+      'title': "Impôts : l'erreur qui coûte cher",
+      'category': 'fiscalite',
+      'duration_seconds': 35,
+    },
+    {
+      'id': 'v-04',
+      'title': 'PEA ou assurance-vie : le match',
+      'category': 'placements',
+      'duration_seconds': 65,
+    },
+  ];
 
   /// Timestamps are computed relative to [now] so the relative dates
   /// displayed in the UI ("Il y a 2 h") always stay realistic.

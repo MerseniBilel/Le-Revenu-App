@@ -24,7 +24,7 @@ class FeaturedArticleCard extends StatelessWidget {
     child: ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: SizedBox(
-        height: 210,
+        height: 200,
         child: Stack(
           fit: StackFit.expand,
           children: [

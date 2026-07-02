@@ -1,4 +1,4 @@
-<h2 class="sr-only">Maquette d'une page d'accueil mobile pour l'application Le Revenu, média financier, sans bandeau de marchés : en-tête avec logo, article à la une, rubriques, liste d'articles et navigation inférieure.</h2>
+<h2 class="sr-only">Maquette complète de la page d'accueil mobile Le Revenu, sans bandeau de marchés : en-tête, article à la une, rubriques, carrousel de vidéos courtes, liste d'articles et navigation inférieure.</h2>
 <style>
 .lr{--brand:#C1272D}
 @media (prefers-color-scheme:dark){.lr{--brand:#F0605F}}
@@ -7,6 +7,12 @@
 .lr .chip{white-space:nowrap;font-size:13px;padding:7px 14px;border-radius:999px;border:0.5px solid var(--border);color:var(--text-secondary);background:var(--surface-2)}
 .lr .eyebrow{font-size:11px;letter-spacing:.09em;font-weight:500;color:var(--brand)}
 .lr .nav i{font-size:22px;display:block;line-height:1}
+.lr .rail{display:flex;gap:11px;overflow-x:auto;padding:2px 20px 6px;scroll-snap-type:x mandatory}
+.lr .vcard{scroll-snap-align:start;flex:0 0 138px;height:244px;border-radius:14px;overflow:hidden;position:relative}
+.lr .wm{position:absolute;top:8px;right:8px;background:#111;color:#fff;font-size:8px;font-weight:500;letter-spacing:.06em;padding:3px 5px;border-radius:3px;border-left:2px solid var(--brand)}
+.lr .dur{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;font-size:9.5px;font-weight:500;padding:2px 6px;border-radius:999px}
+.lr .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 11px;background:rgba(8,10,16,.66);color:#fff;font-size:12px;font-weight:500;line-height:1.26}
+.lr .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;color:#111;font-size:20px}
 </style>
 <div class="lr" style="background:var(--surface-1);border-radius:16px;padding:22px;display:flex;justify-content:center">
   <div style="width:378px;background:var(--surface-2);border:0.5px solid var(--border);border-radius:38px;overflow:hidden">
@@ -24,10 +30,8 @@
       <div style="display:flex;gap:16px;color:var(--text-secondary);font-size:22px;padding-bottom:2px"><i class="ti ti-search"></i><i class="ti ti-bell"></i></div>
     </div>
 
-    <div style="padding:16px 20px 4px">
-      <div class="eyebrow">À LA UNE</div>
-    </div>
-    <div style="margin:6px 20px 0;border-radius:14px;overflow:hidden;position:relative;background:#17202E;height:210px">
+    <div style="padding:16px 20px 4px"><div class="eyebrow">À LA UNE</div></div>
+    <div style="margin:6px 20px 0;border-radius:14px;overflow:hidden;position:relative;background:#17202E;height:200px">
       <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#3a4658;font-size:34px"><i class="ti ti-chart-candle"></i></div>
       <span style="position:absolute;top:12px;left:12px;background:var(--brand);color:#fff;font-size:11px;letter-spacing:.06em;font-weight:500;padding:4px 10px;border-radius:6px">BOURSE</span>
       <div style="position:absolute;left:0;right:0;bottom:0;padding:18px 14px 15px;background:rgba(10,14,22,.72)">
@@ -49,8 +53,39 @@
       <span class="chip">Retraite</span>
     </div>
 
-    <div style="padding:18px 20px 6px;font-size:15px;font-weight:500;color:var(--text-primary)">Dernières actualités</div>
+    <div style="display:flex;align-items:center;gap:8px;padding:20px 20px 12px">
+      <span style="width:8px;height:8px;background:var(--brand);display:inline-block"></span>
+      <span style="font-family:var(--font-voice);font-size:17px;font-weight:500;color:var(--brand)">L'actualité en vidéos courtes</span>
+    </div>
+    <div class="rail">
+      <div class="vcard" style="background:#1E2A3A">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#33465e;font-size:28px"><i class="ti ti-user-circle"></i></div>
+        <span class="wm">LE REVENU</span>
+        <span class="dur"><i class="ti ti-volume-off" style="font-size:10px;vertical-align:-1px"></i></span>
+        <div style="position:absolute;left:10px;right:10px;bottom:56px;height:3px;border-radius:3px;background:rgba(255,255,255,.28)"><div style="width:42%;height:100%;border-radius:3px;background:var(--brand)"></div></div>
+        <div class="cap">Combien gagne vraiment un trader ?</div>
+      </div>
+      <div class="vcard" style="background:#3A2E28">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5c4a3e;font-size:28px"><i class="ti ti-building-community"></i></div>
+        <span class="wm">LE REVENU</span><span class="dur">1:12</span>
+        <div class="play"><i class="ti ti-player-play"></i></div>
+        <div class="cap">SCPI : faut-il encore investir en 2026 ?</div>
+      </div>
+      <div class="vcard" style="background:#24303A">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#3e5260;font-size:28px"><i class="ti ti-receipt-tax"></i></div>
+        <span class="wm">LE REVENU</span><span class="dur">0:35</span>
+        <div class="play"><i class="ti ti-player-play"></i></div>
+        <div class="cap">Impôts : l'erreur qui coûte cher</div>
+      </div>
+      <div class="vcard" style="background:#2A2440">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#463e63;font-size:28px"><i class="ti ti-pig-money"></i></div>
+        <span class="wm">LE REVENU</span><span class="dur">1:05</span>
+        <div class="play"><i class="ti ti-player-play"></i></div>
+        <div class="cap">PEA ou assurance-vie : le match</div>
+      </div>
+    </div>
 
+    <div style="padding:18px 20px 6px;font-size:15px;font-weight:500;color:var(--text-primary)">Dernières actualités</div>
     <div style="padding:0 20px">
       <div style="display:flex;gap:14px;padding:14px 0;border-top:0.5px solid var(--border)">
         <div style="flex:1">
@@ -60,7 +95,6 @@
         </div>
         <div style="width:78px;height:78px;border-radius:10px;flex-shrink:0;background:#1D9E75;display:flex;align-items:center;justify-content:center;color:#e1f5ee;font-size:24px"><i class="ti ti-building-community"></i></div>
       </div>
-
       <div style="display:flex;gap:14px;padding:14px 0;border-top:0.5px solid var(--border)">
         <div style="flex:1">
           <div class="eyebrow">FISCALITÉ</div>
@@ -69,7 +103,6 @@
         </div>
         <div style="width:78px;height:78px;border-radius:10px;flex-shrink:0;background:#BA7517;display:flex;align-items:center;justify-content:center;color:#faeeda;font-size:24px"><i class="ti ti-receipt-tax"></i></div>
       </div>
-
       <div style="display:flex;gap:14px;padding:14px 0;border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border)">
         <div style="flex:1">
           <div class="eyebrow">PLACEMENTS</div>

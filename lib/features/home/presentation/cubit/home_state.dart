@@ -15,18 +15,24 @@ class HomeError extends HomeState {
 }
 
 class HomeLoaded extends HomeState {
-  const HomeLoaded({required this.content, this.selectedRubrique});
+  const HomeLoaded({required this.content});
 
   final HomeContent content;
 
-  /// Rubrique used to filter the news feed. `null` means "Tous".
-  final NewsCategory? selectedRubrique;
-
-  /// Articles displayed in the "Dernières actualités" section, taking the
-  /// selected rubrique into account.
-  List<Article> get visibleArticles => selectedRubrique == null
-      ? content.latestArticles
-      : content.latestArticles
-            .where((article) => article.category == selectedRubrique)
-            .toList();
+  /// "Dernières actualités" grouped by rubrique, in the rubrique order.
+  ///
+  /// Drives both the chip list and the scroll-spy sections: only rubriques
+  /// that actually have articles are present.
+  List<ArticleGroup> get articleGroups => [
+    for (final category in NewsCategory.values)
+      if (content.latestArticles.any((a) => a.category == category))
+        (
+          category: category,
+          articles: content.latestArticles
+              .where((a) => a.category == category)
+              .toList(),
+        ),
+  ];
 }
+
+typedef ArticleGroup = ({NewsCategory category, List<Article> articles});

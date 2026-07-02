@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
@@ -15,7 +17,10 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<Either<Failure, HomeContent>> getHomeContent() async {
     try {
-      final articles = await _dataSource.fetchArticles();
+      final (articles, videos) = await (
+        _dataSource.fetchArticles(),
+        _dataSource.fetchVideoShorts(),
+      ).wait;
       if (articles.isEmpty) {
         return Left(UnexpectedFailure(msg: 'No article available'));
       }
@@ -31,6 +36,7 @@ class HomeRepositoryImpl implements HomeRepository {
         HomeContent(
           featured: featured,
           latestArticles: sorted.where((a) => a != featured).toList(),
+          videoShorts: videos,
         ),
       );
     } catch (e) {

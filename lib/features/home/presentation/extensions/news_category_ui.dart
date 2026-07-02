@@ -17,6 +17,17 @@ extension NewsCategoryUi on NewsCategory {
     NewsCategory.retraite => Icons.beach_access_outlined,
   };
 
+  /// Dark tinted panel behind a video thumbnail (same in both themes,
+  /// like the hero card — editorial style).
+  Color get videoPanelColor => switch (this) {
+    NewsCategory.bourse => const Color(0xFF1E2A3A),
+    NewsCategory.immobilier => const Color(0xFF3A2E28),
+    NewsCategory.placements => const Color(0xFF2A2440),
+    NewsCategory.fiscalite => const Color(0xFF24303A),
+    NewsCategory.assurance => const Color(0xFF3A2430),
+    NewsCategory.retraite => const Color(0xFF2A2634),
+  };
+
   /// Identity color of the rubrique, adapted to the current brightness.
   Color colorOf(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

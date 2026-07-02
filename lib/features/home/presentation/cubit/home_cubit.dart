@@ -14,26 +14,18 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> load() async {
     emit(const HomeLoading());
-    final result = await _getHomeContent();
-    result.fold(
-      (failure) => emit(HomeError(failure.message)),
-      (content) => emit(HomeLoaded(content: content)),
-    );
+    await _fetch();
   }
 
   /// Refresh triggered by the pull-to-refresh gesture: reloads the content
   /// without flashing the loading state.
-  Future<void> refresh() async {
+  Future<void> refresh() => _fetch();
+
+  Future<void> _fetch() async {
     final result = await _getHomeContent();
     result.fold(
       (failure) => emit(HomeError(failure.message)),
       (content) => emit(HomeLoaded(content: content)),
     );
-  }
-
-  void selectRubrique(NewsCategory? rubrique) {
-    final current = state;
-    if (current is! HomeLoaded) return;
-    emit(HomeLoaded(content: current.content, selectedRubrique: rubrique));
   }
 }
