@@ -1,53 +1,36 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/extensions/context.dart';
 import '../../../../core/extensions/snackbar.dart';
 import '../../../../core/shared/widgets/hairline.dart';
 import '../../domain/entities/home_entities_export.dart';
 import 'article_tile.dart';
 
-/// One position of the news feed: an article row, the closing hairline
-/// after the last row, or the "empty rubrique" message.
+/// One row of the news feed: hairline + article tile.
+///
+/// The height is fixed (title clamped to two lines) so the scroll offset of
+/// any article can be computed exactly, even when the row is not built yet
+/// — which is what makes the chip → auto-scroll precise on a lazy list.
 class ArticleListItem extends StatelessWidget {
-  const ArticleListItem({
-    required this.articles,
-    required this.index,
-    super.key,
-  });
+  const ArticleListItem({required this.article, super.key});
 
-  final List<Article> articles;
-  final int index;
+  static const height = 107.0;
+
+  final Article article;
 
   @override
-  Widget build(BuildContext context) {
-    if (articles.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-        child: Center(
-          child: Text(
-            'Aucun article dans cette rubrique pour le moment.',
-            style: context.h6.copyWith(color: context.paragraph),
-          ),
-        ),
-      );
-    }
-    if (index == articles.length) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Hairline(),
-      );
-    }
-    return Padding(
+  Widget build(BuildContext context) => SizedBox(
+    height: height,
+    child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           const Hairline(),
           ArticleTile(
-            article: articles[index],
+            article: article,
             onTap: () => context.showComingSoon("L'article"),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
 }

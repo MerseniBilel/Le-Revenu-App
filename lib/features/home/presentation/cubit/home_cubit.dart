@@ -21,12 +21,6 @@ class HomeCubit extends Cubit<HomeState> {
   /// without flashing the loading state.
   Future<void> refresh() => _fetch();
 
-  void selectRubrique(NewsCategory? rubrique) {
-    final current = state;
-    if (current is! HomeLoaded) return;
-    emit(HomeLoaded(content: current.content, selectedRubrique: rubrique));
-  }
-
   Future<void> _fetch() async {
     final result = await _getHomeContent();
     result.fold(

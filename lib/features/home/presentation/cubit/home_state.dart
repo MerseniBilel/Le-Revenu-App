@@ -15,12 +15,9 @@ class HomeError extends HomeState {
 }
 
 class HomeLoaded extends HomeState {
-  const HomeLoaded({required this.content, this.selectedRubrique});
+  const HomeLoaded({required this.content});
 
   final HomeContent content;
-
-  /// Rubrique used to filter the news feed. `null` means "Tous".
-  final NewsCategory? selectedRubrique;
 
   /// Rubriques that actually have articles, in the editorial order.
   List<NewsCategory> get rubriques => [
@@ -28,11 +25,14 @@ class HomeLoaded extends HomeState {
       if (content.latestArticles.any((a) => a.category == category)) category,
   ];
 
-  /// Articles displayed in the "Dernières actualités" section, taking the
-  /// selected rubrique into account.
-  List<Article> get visibleArticles => selectedRubrique == null
-      ? content.latestArticles
-      : content.latestArticles
-            .where((article) => article.category == selectedRubrique)
-            .toList();
+  /// News feed ordered rubrique by rubrique, so a chip can scroll straight
+  /// to the beginning of its rubrique.
+  List<Article> get orderedArticles => [
+    for (final category in rubriques)
+      ...content.latestArticles.where((a) => a.category == category),
+  ];
+
+  /// Position of the first article of [rubrique] in [orderedArticles].
+  int firstArticleIndexOf(NewsCategory rubrique) =>
+      orderedArticles.indexWhere((a) => a.category == rubrique);
 }
