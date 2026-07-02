@@ -11,15 +11,16 @@ La page d'accueil comprend :
   **bouton clair/sombre** (préférence persistée via `hydrated_bloc`) ;
 - l'**actualité principale** mise en avant (« À la une ») dans une carte héro ;
 - des **rubriques** (Bourse, Immobilier, Placements, Fiscalité, Assurance, Retraite)
-  sous forme de chips **épinglées en haut au scroll** avec **scroll-spy** : la
-  rubrique active se met à jour selon la position de défilement, et taper une
-  chip fait défiler jusqu'à sa section ;
+  sous forme de chips horizontales qui **filtrent** la liste d'articles
+  (chip « Tous » pour revenir à tout) ;
 - **« L'actualité en vidéos courtes »** : carrousel horizontal de vignettes.
-  Les vidéos **ne se lancent pas sur la home** — un tap ouvre un écran plein
-  écran avec **animation Hero**, où la lecture (simulée) démarre, avec
-  progression, play/pause et coupure du son ;
-- la liste des **dernières actualités**, groupée par rubrique, avec catégorie,
-  temps de lecture et date relative (« Il y a 35 min ») ;
+  Les vidéos **ne se lancent pas sur la home** — un tap ouvre un lecteur plein
+  écran avec **animation Hero**, façon TikTok : `PageView` vertical pour passer
+  d'une vidéo à l'autre, avec un indicateur animé « glissez pour changer de
+  vidéo » qui disparaît après quelques secondes ou au premier swipe. Lecture
+  (simulée) avec progression, play/pause et coupure du son ;
+- la liste des **dernières actualités**, avec catégorie, temps de lecture et
+  date relative (« Il y a 35 min ») ;
 - **pull-to-refresh**, états de **chargement** et d'**erreur** avec retry ;
 - support complet du **mode sombre**.
 
@@ -100,34 +101,24 @@ lib/
   → `HomeLocalDataSource`), câblées par injection : brancher une vraie API se
   résume à une nouvelle implémentation de la data source.
 
-### Rubriques épinglées + scroll-spy
-
-Volontairement **sans slivers**, pour rester lisible : le corps de page est un
-simple `SingleChildScrollView` + `Column`, et l'effet « épinglé » est obtenu
-avec un `Stack` — dès que la barre de chips inline passe le haut du corps, une
-copie flottante (même widget) est superposée en haut. Les articles sont groupés
-par rubrique (`HomeLoaded.articleGroups`) ; chaque groupe porte une
-`GlobalKey`. Au défilement, la section dont le haut est passé sous la barre
-devient la rubrique active ; taper une chip anime le scroll jusqu'à son groupe
-(le scroll-spy est suspendu pendant l'animation pour éviter que les sections
-intermédiaires « volent » la sélection). La liste de chips défile
-automatiquement pour garder la chip active visible.
-
 ### Vidéos courtes
 
 Sur la home, les vignettes sont **statiques** (aucune lecture). Un tap navigue
-vers `VideoShortPlayerScreen` via une route typée, la vignette se prolonge en
-plein écran grâce à un **Hero** partagé. La lecture y est **simulée** par un
-`AnimationController` calé sur la durée réelle de la vidéo (progression,
-play/pause au tap, replay en fin de lecture) — fidèle au comportement attendu
-sans embarquer de fichiers médias.
+vers `VideoShortPlayerScreen` via une route typée (la playlist et l'index
+tapé passent en `$extra`), la vignette se prolonge en plein écran grâce à un
+**Hero** partagé. Le lecteur est un `PageView` **vertical** façon TikTok :
+glisser vers le haut/bas passe à la vidéo suivante/précédente, et un
+indicateur animé l'explique à l'utilisateur (il disparaît au premier swipe).
+La lecture est **simulée** par un `AnimationController` calé sur la durée
+réelle de la vidéo (progression, play/pause au tap, replay en fin de lecture)
+— fidèle au comportement attendu sans embarquer de fichiers médias.
 
 ### Performances
 
-- Rails horizontaux construits paresseusement (`ListView.separated`) ; le corps
-  vertical est un `SingleChildScrollView` assumé : le contenu est court et
-  borné (fake data), et garder toutes les sections montées rend le scroll-spy
-  fiable sans machinerie sliver ;
+- Tout le corps de page est un seul `ListView.builder` paresseux : les
+  premières positions sont les sections (à la une, rubriques, vidéos), le
+  reste est le fil d'articles — rien n'est construit hors écran ; les rails
+  horizontaux sont aussi des `ListView` lazy ;
 - widgets `const` partout où c'est possible, sous-widgets privés plutôt que
   méthodes-builder pour maximiser le cache de l'arbre ;
 - rebuilds limités : l'en-tête ne se reconstruit pas lors des changements

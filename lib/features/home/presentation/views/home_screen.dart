@@ -7,8 +7,8 @@ import '../../../../core/router/router.dart';
 import '../../../../core/shared/theme_manager_cubit.dart';
 import '../../../../core/shared/widgets/eyebrow_text.dart';
 import '../../../../core/shared/widgets/section_header.dart';
-import '../../domain/entities/home_entities_export.dart';
 import '../cubit/home_cubit.dart';
+import '../models/video_playlist.dart';
 import '../widgets/article_tile.dart';
 import '../widgets/featured_article_card.dart';
 import '../widgets/home_header.dart';
@@ -54,226 +54,122 @@ class _HomeView extends StatelessWidget {
   );
 }
 
-/// Scrollable body of the page.
-///
-/// The rubrique chips scroll with the content; once they pass the top of the
-/// body, a floating copy of the bar is overlaid ("pinned" effect) and acts
-/// as a scroll-spy over the grouped "Dernières actualités":
-/// - scrolling updates the highlighted chip based on the group under the bar;
-/// - tapping a chip scrolls to its group.
-class _HomeContent extends StatefulWidget {
+/// Scrollable body of the page: one lazy [ListView.builder] where the first
+/// indices are the page sections and the rest is the (filtered) news feed.
+class _HomeContent extends StatelessWidget {
   const _HomeContent({required this.state});
 
   final HomeLoaded state;
 
-  @override
-  State<_HomeContent> createState() => _HomeContentState();
-}
-
-class _HomeContentState extends State<_HomeContent> {
-  static const _chipsBarHeight = 54.0;
-
-  final _scrollController = ScrollController();
-  final _bodyKey = GlobalKey();
-  final _inlineChipsKey = GlobalKey();
-  late Map<NewsCategory, GlobalKey> _groupKeys;
-
-  NewsCategory? _activeRubrique;
-  bool _showFloatingBar = false;
-
-  /// Suspends the scroll-spy while a chip-triggered animation is running,
-  /// so intermediate groups don't steal the selection.
-  bool _autoScrolling = false;
-
-  List<ArticleGroup> get _groups => widget.state.articleGroups;
-
-  @override
-  void initState() {
-    super.initState();
-    _buildGroupKeys();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void didUpdateWidget(_HomeContent oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.state != oldWidget.state) _buildGroupKeys();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _buildGroupKeys() {
-    _groupKeys = {for (final group in _groups) group.category: GlobalKey()};
-    _activeRubrique = _groups.isEmpty ? null : _groups.first.category;
-  }
-
-  /// Screen-space Y of the top edge of the widget owning [key].
-  double? _topOf(GlobalKey key) {
-    final box = key.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null || !box.attached) return null;
-    return box.localToGlobal(Offset.zero).dy;
-  }
-
-  void _onScroll() {
-    if (_groups.isEmpty) return;
-    final bodyTop = _topOf(_bodyKey);
-    final chipsTop = _topOf(_inlineChipsKey);
-    if (bodyTop == null || chipsTop == null) return;
-
-    final showFloatingBar = chipsTop <= bodyTop;
-
-    // Active group = the last one whose top passed under the chips bar.
-    var active = _activeRubrique;
-    if (!_autoScrolling) {
-      final threshold = bodyTop + _chipsBarHeight + 12;
-      active = null;
-      for (final group in _groups) {
-        final top = _topOf(_groupKeys[group.category]!);
-        if (top == null || top > threshold) break;
-        active = group.category;
-      }
-      active ??= _groups.first.category;
-    }
-
-    if (showFloatingBar != _showFloatingBar || active != _activeRubrique) {
-      setState(() {
-        _showFloatingBar = showFloatingBar;
-        _activeRubrique = active;
-      });
-    }
-  }
-
-  Future<void> _scrollToRubrique(NewsCategory rubrique) async {
-    final top = _topOf(_groupKeys[rubrique]!);
-    final bodyTop = _topOf(_bodyKey);
-    if (top == null || bodyTop == null) return;
-
-    setState(() {
-      _activeRubrique = rubrique;
-      _autoScrolling = true;
-    });
-    final target = (_scrollController.offset + top - bodyTop - _chipsBarHeight)
-        .clamp(0.0, _scrollController.position.maxScrollExtent);
-    await _scrollController.animateTo(
-      target,
-      duration: const Duration(milliseconds: 420),
-      curve: Curves.easeInOutCubic,
-    );
-    if (mounted) setState(() => _autoScrolling = false);
-  }
+  static const _featuredIndex = 0;
+  static const _rubriquesHeaderIndex = 1;
+  static const _chipsIndex = 2;
+  static const _videosIndex = 3;
+  static const _latestHeaderIndex = 4;
+  static const _sectionCount = 5;
 
   @override
   Widget build(BuildContext context) {
-    final content = widget.state.content;
-    return Stack(
-      key: _bodyKey,
-      children: [
-        RefreshIndicator(
-          onRefresh: context.read<HomeCubit>().refresh,
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const EyebrowText('À la une'),
-                      const SizedBox(height: 8),
-                      FeaturedArticleCard(
-                        article: content.featured,
-                        onTap: () => _showComingSoon(context, "L'article"),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 2),
-                  child: SectionHeader(
-                    title: 'Rubriques',
-                    actionLabel: 'Tout voir',
-                    onActionTap: () =>
-                        _showComingSoon(context, 'Cette section'),
-                  ),
-                ),
-                _chipsBar(key: _inlineChipsKey),
-                if (content.videoShorts.isNotEmpty)
-                  VideoShortsRail(
-                    videos: content.videoShorts,
-                    onVideoTap: (video) =>
-                        VideoShortRoute(video).push<void>(context),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
-                  child: const SectionHeader(title: 'Dernières actualités'),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      for (final group in _groups)
-                        Column(
-                          key: _groupKeys[group.category],
-                          children: [
-                            for (final article in group.articles) ...[
-                              _hairline(context),
-                              ArticleTile(
-                                article: article,
-                                onTap: () =>
-                                    _showComingSoon(context, "L'article"),
-                              ),
-                            ],
-                          ],
-                        ),
-                      _hairline(context),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
-          ),
+    final articles = state.visibleArticles;
+    // Articles + a closing hairline (or a single "empty" message).
+    final articleItemCount = articles.isEmpty ? 1 : articles.length + 1;
+
+    return RefreshIndicator(
+      onRefresh: context.read<HomeCubit>().refresh,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
         ),
-        if (_showFloatingBar)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: _chipsBar(floating: true),
+        padding: const EdgeInsets.only(bottom: 24),
+        itemCount: _sectionCount + articleItemCount,
+        itemBuilder: (context, index) => switch (index) {
+          _featuredIndex => _buildFeatured(context),
+          _rubriquesHeaderIndex => _buildRubriquesHeader(context),
+          _chipsIndex => _buildChips(context),
+          _videosIndex => _buildVideosRail(context),
+          _latestHeaderIndex => const Padding(
+            padding: EdgeInsets.fromLTRB(20, 18, 20, 6),
+            child: SectionHeader(title: 'Dernières actualités'),
           ),
-      ],
+          _ => _buildArticleItem(context, index - _sectionCount),
+        },
+      ),
     );
   }
 
-  /// The chips bar is a single widget used twice: inline in the scroll flow,
-  /// and as the floating "pinned" copy (with background and hairline).
-  Widget _chipsBar({Key? key, bool floating = false}) => Container(
-    key: key,
-    height: _chipsBarHeight,
-    alignment: Alignment.center,
-    decoration: floating
-        ? BoxDecoration(
-            color: context.theme.scaffoldBackgroundColor,
-            border: Border(
-              bottom: BorderSide(color: context.fieldStroke, width: .5),
-            ),
-          )
-        : null,
-    child: RubriqueChips(
-      rubriques: [for (final group in _groups) group.category],
-      selected: _activeRubrique,
-      onSelected: _scrollToRubrique,
+  Widget _buildFeatured(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const EyebrowText('À la une'),
+        const SizedBox(height: 8),
+        FeaturedArticleCard(
+          article: state.content.featured,
+          onTap: () => _showComingSoon(context, "L'article"),
+        ),
+      ],
     ),
   );
+
+  Widget _buildRubriquesHeader(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+    child: SectionHeader(
+      title: 'Rubriques',
+      actionLabel: 'Tout voir',
+      onActionTap: () => _showComingSoon(context, 'Cette section'),
+    ),
+  );
+
+  Widget _buildChips(BuildContext context) => RubriqueChips(
+    rubriques: state.rubriques,
+    selected: state.selectedRubrique,
+    onSelected: context.read<HomeCubit>().selectRubrique,
+  );
+
+  Widget _buildVideosRail(BuildContext context) {
+    final videos = state.content.videoShorts;
+    if (videos.isEmpty) return const SizedBox.shrink();
+    return VideoShortsRail(
+      videos: videos,
+      onVideoTap: (video) => VideoShortRoute(
+        VideoPlaylist(videos: videos, initialIndex: videos.indexOf(video)),
+      ).push<void>(context),
+    );
+  }
+
+  Widget _buildArticleItem(BuildContext context, int index) {
+    final articles = state.visibleArticles;
+    if (articles.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+        child: Center(
+          child: Text(
+            'Aucun article dans cette rubrique pour le moment.',
+            style: context.h6.copyWith(color: context.paragraph),
+          ),
+        ),
+      );
+    }
+    if (index == articles.length) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: _hairline(context),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          _hairline(context),
+          ArticleTile(
+            article: articles[index],
+            onTap: () => _showComingSoon(context, "L'article"),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _hairline(BuildContext context) =>
       Divider(height: .5, thickness: .5, color: context.fieldStroke);

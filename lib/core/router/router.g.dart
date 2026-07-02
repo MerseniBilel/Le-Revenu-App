@@ -38,7 +38,7 @@ mixin $HomeRoute on GoRouteData {
 
 mixin $VideoShortRoute on GoRouteData {
   static VideoShortRoute _fromState(GoRouterState state) =>
-      VideoShortRoute(state.extra as VideoShort);
+      VideoShortRoute(state.extra as VideoPlaylist);
 
   VideoShortRoute get _self => this as VideoShortRoute;
 

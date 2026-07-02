@@ -7,5 +7,6 @@ export 'package:lerevenu/core/theme/theme.dart';
 export 'package:sizer/sizer.dart';
 
 export '../../features/home/domain/entities/home_entities_export.dart';
+export '../../features/home/presentation/models/video_playlist.dart';
 export '../../features/home/presentation/views/home_screen.dart';
 export '../../features/home/presentation/views/video_short_player_screen.dart';
